@@ -10,6 +10,7 @@ int main() {
     ret = GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
     int col = csbi.srWindow.Right - csbi.srWindow.Left;
     int c = 0, t = 1;
+    const int SPAN = 80;
     while (true) {
         system("cls");
         if (c < 0) {
@@ -22,7 +23,7 @@ int main() {
             putchar(' ');
         }
         printf("%s", str);
-        Sleep(50);
+        Sleep(SPAN);
         c += t;
     }
     return 0;
