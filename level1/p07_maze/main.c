@@ -51,7 +51,7 @@ int main() {
         }
     }
     system("cls");
-    printf("YOU WIN!!!\nCongratulations!\n");
+    printf("YOU WIN!!!\nCongratulations!\nHere is the flag:\ncnss{I_AM_MA2E_MAS73R_AND_I_L0V3_T1M!}");
     return 0;
 }
 
@@ -81,6 +81,16 @@ void dfs(int x, int y) {
         else ny--;
         if (valid(nx, ny) && !vis[nx][ny] && (!end_exsit || (nx != 0 && nx != LEN - 1 && ny != 0 && ny != LEN - 1)) && check(nx, ny)) {
             if (!end_exsit && (ny == 0 || ny == LEN - 1 || nx == LEN - 1)) {
+                now = (now + 1) % 4;
+                continue;
+            }
+            // 防止迷宫过于稀疏
+            int flag_A = 0;
+            if (valid(nx-1, ny) && maze[nx-1][ny] == ' ') flag_A++;
+            if (valid(nx+1, ny) && maze[nx+1][ny] == ' ') flag_A++;
+            if (valid(nx, ny-1) && maze[nx][ny-1] == ' ') flag_A++;
+            if (valid(nx, ny+1) && maze[nx][ny+1] == ' ') flag_A++;
+            if (flag_A > 1) {
                 now = (now + 1) % 4;
                 continue;
             }
