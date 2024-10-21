@@ -20,4 +20,6 @@ add_executable(p09_linked_list p09_linked_list/main.c
         p09_linked_list/list.c
         p09_linked_list/list.h)
 
-add_executable(p10_warehouse p10_warehouse/main.c)
+add_executable(p10_warehouse p10_warehouse/main.c
+        p10_warehouse/repo.c
+        p10_warehouse/repo.h)
