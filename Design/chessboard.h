@@ -12,6 +12,8 @@
 #include <ctime>
 #include <cstdio>
 #include <cmath>
+#include <stack>
+#include <utility>
 #include "gobang.h"
 
 
@@ -29,6 +31,8 @@ public:
     void startNewGame();
     void paintEvent(QPaintEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
+    void mouseMoveEvent(QMouseEvent *event) override;
+    void drawPiece(int x, int y, QPainter *painter, int r);
 signals:
     void human();
     void ai();
@@ -36,10 +40,14 @@ signals:
 public slots:
     void AIMove();
     void HumanMove();
+    void regret();
 
 private:
     Ui::ChessBoard *ui;
     QPoint clickedPoint;
+    std::stack< std::pair<int, int> > pieces;
+    int mousePosX;
+    int mousePosY;
     int T;  //
     int board[ROW][COLUMN];
 };
