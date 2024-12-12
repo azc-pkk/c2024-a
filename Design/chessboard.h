@@ -9,12 +9,11 @@
 #include <QPainter>
 #include <QBrush>
 #include <QMouseEvent>
-#include <ctime>
 #include <cstdio>
 #include <cmath>
 #include <stack>
 #include <utility>
-#include "gobang.h"
+#include "aithread.h"
 
 
 QT_BEGIN_NAMESPACE
@@ -38,17 +37,20 @@ signals:
     void ai();
 
 public slots:
+    void AIThreadActivate();
     void AIMove();
     void HumanMove();
     void regret();
+    void reStart();
 
 private:
     Ui::ChessBoard *ui;
     QPoint clickedPoint;
+    AIThread *aiThread;
     std::stack< std::pair<int, int> > pieces;
     int mousePosX;
     int mousePosY;
-    int T;  //
+    int T;
     int board[ROW][COLUMN];
 };
 

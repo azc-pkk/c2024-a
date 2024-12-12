@@ -13,21 +13,26 @@ const int MARGIN = 40;
 
 ChessBoard::ChessBoard(QWidget *parent) :
         QWidget(parent), ui(new Ui::ChessBoard) {
+
     ui->setupUi(this);
+//    ui->messageBox->setWordWrap(true);
+    ui->plainTextEdit->setReadOnly(true);
     setMouseTracking(true);
     mousePosX = 0;
     mousePosY = 0;
-//    this->resize(MARGIN * 2 + gridSize * (gridCount - 1), MARGIN * 2 + gridSize * (gridCount - 1));
-    connect(this, &ChessBoard::ai, this, &ChessBoard::AIMove);
+    setWindowTitle("五子棋");
+    aiThread = new AIThread(this);
+
+    connect(this, &ChessBoard::ai, this, &ChessBoard::AIThreadActivate);
     connect(this, &ChessBoard::human, this, &ChessBoard::HumanMove);
     connect(ui->rollbackButton, &QPushButton::clicked, this, &ChessBoard::regret);
+    connect(ui->restartButton, &QPushButton::clicked, this, &ChessBoard::reStart);
+    connect(aiThread, &AIThread::AIEnd, this, &ChessBoard::AIMove);
+
     startNewGame();
 }
 
 void ChessBoard::startNewGame() {
-    while (!pieces.empty()) {
-        pieces.pop();
-    }
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COLUMN; j++) {
             board[i][j] = 0;
@@ -101,16 +106,20 @@ void ChessBoard::mouseMoveEvent(QMouseEvent *event) {
     }
 }
 
+void ChessBoard::AIThreadActivate() {
+    ui->plainTextEdit->appendPlainText("AI 正在思考...");
+    aiThread->start();
+}
+
 void ChessBoard::AIMove() {
-    printf("AI Acting:\n");
-    clock_t start_time = clock();
-    std::pair<int, int> piece = fool();
-    clock_t end_time = clock();
-    printf("It takes %lfs for AI to think.\n", (double)(end_time - start_time) / 1000.0);
+    std::pair<int, int> piece = next_step;
     pieces.push(piece);
     list3.insert(piece);
     list1.insert(piece);
     board[piece.first][piece.second] = 1;
+    ui->plainTextEdit->appendPlainText(QString("AI 花了 ") + QString::number(runningTime) + QString(" 秒来思考对策。"));
+//    ui->plainTextEdit->appendPlainText(QString::number(runningTime));
+//    ui->plainTextEdit->appendPlainText(" 秒来思考对策。");
     repaint();
     T++;
 }
@@ -128,7 +137,52 @@ void ChessBoard::HumanMove() {
 }
 
 void ChessBoard::regret() {
-    printf("Regret!\n");
+    if (aiThread->isRunning()) {
+//        ui->messageBox->setText("AI 正在思考，悔棋失败！");
+    ui->plainTextEdit->appendPlainText("AI 正在思考，悔棋失败！");
+    }
+    else if (!pieces.empty()) {
+        std::pair<int, int> piece = pieces.top();
+        pieces.pop();
+        list1.erase(piece);
+        list3.erase(piece);
+        board[piece.first][piece.second] = 0;
+
+        piece = pieces.top();
+        pieces.pop();
+        list2.erase(piece);
+        list3.erase(piece);
+        board[piece.first][piece.second] = 0;
+
+        ui->plainTextEdit->appendPlainText("悔棋成功！");
+        repaint();
+    }
+    else {
+        ui->plainTextEdit->appendPlainText("你还没有下棋！");
+    }
+}
+
+void ChessBoard::reStart() {
+    if (aiThread->isRunning()) {
+        ui->plainTextEdit->appendPlainText("AI 正在思考，无法重新开始！");
+    }
+    else {
+        std::pair<int, int> piece;
+        while (!pieces.empty()) {
+            piece = pieces.top();
+            pieces.pop();
+            list1.erase(piece);
+            list3.erase(piece);
+
+            piece = pieces.top();
+            pieces.pop();
+            list2.erase(piece);
+            list3.erase(piece);
+        }
+        startNewGame();
+        repaint();
+        ui->plainTextEdit->setPlainText("重新开始！");
+    }
 }
 
 void ChessBoard::drawPiece(int x, int y, QPainter *painter, int r) {
