@@ -11,9 +11,9 @@ int64_t alpha_beta(bool is_ai, int depth, int64_t alpha, int64_t beta) {
 //        printf("%lld\n", evaluate());
         return evaluate();
     }
-    for (int i = 0; i <= ROW; i++) {
-        for (int j = 0; j <= COLUMN; j++) {
-            if (list3.count(std::make_pair(i, j)) == 0 && has_neighbour(i, j, 1)) {
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COLUMN; j++) {
+            if (evl_board[i][j] == 0 && has_neighbour(i, j, 1)) {
                 list3.insert(std::make_pair(i, j));
 
                 if (is_ai) { // AI 下，最大
@@ -52,28 +52,28 @@ int64_t alpha_beta(bool is_ai, int depth, int64_t alpha, int64_t beta) {
 bool game_win(std::set< std::pair<int, int> > &li) {
     for (std::pair<int, int> piece : li) {
         int x = piece.first, y = piece.second;
-        if (y + 4 <= COLUMN) { // 横
+        if (y + 4 < COLUMN) { // 横
             if (li.count(std::make_pair(x, y + 1)) != 0
             &&  li.count(std::make_pair(x, y + 2)) != 0
             &&  li.count(std::make_pair(x, y + 3)) != 0
             &&  li.count(std::make_pair(x, y + 4)) != 0
             ) return true;
         }
-        if (x + 4 <= ROW) { // 竖
+        if (x + 4 < ROW) { // 竖
             if (li.count(std::make_pair(x + 1, y)) != 0
             &&  li.count(std::make_pair(x + 2, y)) != 0
             &&  li.count(std::make_pair(x + 3, y)) != 0
             &&  li.count(std::make_pair(x + 4, y)) != 0
             ) return true;
         }
-        if (x + 4 <= ROW && y - 4 >= 0) { // 左下
+        if (x + 4 < ROW && y - 4 >= 0) { // 左下
             if (li.count(std::make_pair(x + 1, y - 1)) != 0
             &&  li.count(std::make_pair(x + 2, y - 2)) != 0
             &&  li.count(std::make_pair(x + 3, y - 3)) != 0
             &&  li.count(std::make_pair(x + 4, y - 4)) != 0
             ) return true;
         }
-        if (x + 4 <= ROW && y + 4 <= COLUMN) { // 右下
+        if (x + 4 < ROW && y + 4 < COLUMN) { // 右下
             if (li.count(std::make_pair(x + 1, y + 1)) != 0
             &&  li.count(std::make_pair(x + 2, y + 2)) != 0
             &&  li.count(std::make_pair(x + 3, y + 3)) != 0

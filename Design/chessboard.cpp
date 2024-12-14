@@ -146,7 +146,9 @@ void ChessBoard::HumanMove() {
     T++;
     check();
     repaint();
-    emit this->ai();
+    if (!whiteWin && !blackWin) {
+        emit this->ai();
+    }
 }
 
 void ChessBoard::regret() {
