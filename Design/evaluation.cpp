@@ -1,5 +1,6 @@
 #include "evaluation.h"
 
+int evl_board[ROW][COLUMN];
 std::set< std::pair<int, int> > list1, list2, list3;
 //std::list< std::pair<int, int> > calculated;
 std::list< std::pair<int64_t, std::list< std::pair<int, int> > > > calculated;
@@ -76,6 +77,8 @@ int64_t cal(int x, int y, int dx, int dy, std::set< std::pair<int, int> > &my_li
             if (x == piece.first && y == piece.second)
                 return 0;
 
+    bool is_ai = false;
+    if (my_list == list1) is_ai = true;
 
     int64_t max_score = 0;
     std::list< std::pair<int, int> > max_shape;
@@ -83,7 +86,7 @@ int64_t cal(int x, int y, int dx, int dy, std::set< std::pair<int, int> > &my_li
         for (int offset = -len + 1; offset <= 0; offset++){
             std::list<int> tmp_shape;
             for (int i = 0; i < len; i++) {
-                tmp_shape.push_back(check(x + (i + offset) * dx, y + (i + offset) * dy, my_list));
+                tmp_shape.push_back(check(x + (i + offset) * dx, y + (i + offset) * dy, is_ai ? 1 : 2));
             }
             for (const auto& shape: SHAPE) {
                 if (shape.first > max_score && shape.second == tmp_shape) {
@@ -114,16 +117,17 @@ int64_t cal_cross(int x, int y) {
     return res;
 }
 
-int check(int x, int y, std::set< std::pair<int, int> > &li) {
-    if (li.count(std::make_pair(x, y)) != 0) return 1;
-    if (list3.count(std::make_pair(x, y)) != 0) return 2;
+int check(int x, int y, int tag) {
+    if (evl_board[x][y] == tag) return 1;
+    if (evl_board[x][y] != 0) return 2;
     return 0;
 }
 
 bool has_neighbour(int x, int y, int n) {
     for (int i = -n; i <= n; i++) {
         for (int j = -n; j <= n; j++) {
-            if (list3.count(std::make_pair(x + i, y + j)) != 0) return true;
+            if (x + i < 0 || x + i >= ROW || y + j < 0 || y + j >= COLUMN) continue;
+            if (evl_board[x + i][y + j] != 0) return true;
         }
     }
     return false;

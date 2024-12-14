@@ -20,19 +20,22 @@ ChessBoard::ChessBoard(QWidget *parent) :
     setMouseTracking(true);
     mousePosX = 0;
     mousePosY = 0;
+    T = 0;
     setWindowTitle("五子棋");
     aiThread = new AIThread(this);
 
-    connect(this, &ChessBoard::ai, this, &ChessBoard::AIThreadActivate);
-    connect(this, &ChessBoard::human, this, &ChessBoard::HumanMove);
     connect(ui->rollbackButton, &QPushButton::clicked, this, &ChessBoard::regret);
     connect(ui->restartButton, &QPushButton::clicked, this, &ChessBoard::reStart);
     connect(aiThread, &AIThread::AIEnd, this, &ChessBoard::AIMove);
+    connect(this, &ChessBoard::ai, this, &ChessBoard::AIThreadActivate);
+    connect(this, &ChessBoard::human, this, &ChessBoard::HumanMove);
 
     startNewGame();
 }
 
 void ChessBoard::startNewGame() {
+    blackWin = false;
+    whiteWin = false;
     for (int i = 0; i < ROW; i++) {
         for (int j = 0; j < COLUMN; j++) {
             board[i][j] = 0;
@@ -75,7 +78,7 @@ void ChessBoard::paintEvent(QPaintEvent *event) {
         }
     }
 
-    if (T % 2 == 0 && board[mousePosX][mousePosY] == 0) {
+    if (!blackWin && !whiteWin && T % 2 == 0 && board[mousePosX][mousePosY] == 0) {
         painter.setBrush(geryBrush);
         drawPiece(mousePosX, mousePosY, &painter, radius);
     }
@@ -84,6 +87,9 @@ void ChessBoard::paintEvent(QPaintEvent *event) {
 void ChessBoard::mousePressEvent(QMouseEvent *event)  {
     if (event->button() == Qt::LeftButton) {
         if (event->pos().x() < MARGIN || event->pos().y() < MARGIN || event->pos().x() > (gridCount - 1) * gridSize + MARGIN || event->pos().y() > (gridCount - 1) * gridSize + MARGIN) {
+
+        }
+        else if (blackWin || whiteWin) {
 
         }
         else if (T % 2 == 0) {
@@ -97,6 +103,9 @@ void ChessBoard::mouseMoveEvent(QMouseEvent *event) {
     if (event->pos().x() < MARGIN || event->pos().y() < MARGIN || event->pos().x() > (gridCount - 1) * gridSize + MARGIN || event->pos().y() > (gridCount - 1) * gridSize + MARGIN) {
 
     }
+    else if (blackWin || whiteWin) {
+
+    }
     else {
         int x = round(((double) event->pos().x() - MARGIN) / gridSize);
         int y = round(((double) event->pos().y() - MARGIN) / gridSize);
@@ -107,6 +116,7 @@ void ChessBoard::mouseMoveEvent(QMouseEvent *event) {
 }
 
 void ChessBoard::AIThreadActivate() {
+    memcpy(evl_board, board, sizeof(board));
     ui->plainTextEdit->appendPlainText("AI 正在思考...");
     aiThread->start();
 }
@@ -118,8 +128,7 @@ void ChessBoard::AIMove() {
     list1.insert(piece);
     board[piece.first][piece.second] = 1;
     ui->plainTextEdit->appendPlainText(QString("AI 花了 ") + QString::number(runningTime) + QString(" 秒来思考对策。"));
-//    ui->plainTextEdit->appendPlainText(QString::number(runningTime));
-//    ui->plainTextEdit->appendPlainText(" 秒来思考对策。");
+    check();
     repaint();
     T++;
 }
@@ -132,6 +141,7 @@ void ChessBoard::HumanMove() {
     list2.insert(std::make_pair(x, y));
     board[x][y] = 2;
     T++;
+    check();
     repaint();
     emit this->ai();
 }
@@ -140,6 +150,9 @@ void ChessBoard::regret() {
     if (aiThread->isRunning()) {
 //        ui->messageBox->setText("AI 正在思考，悔棋失败！");
     ui->plainTextEdit->appendPlainText("AI 正在思考，悔棋失败！");
+    }
+    else if (blackWin || whiteWin) {
+        ui->plainTextEdit->appendPlainText("悔棋失败，游戏已结束！");
     }
     else if (!pieces.empty()) {
         std::pair<int, int> piece = pieces.top();
@@ -167,6 +180,7 @@ void ChessBoard::reStart() {
         ui->plainTextEdit->appendPlainText("AI 正在思考，无法重新开始！");
     }
     else {
+        T = 0;
         std::pair<int, int> piece;
         while (!pieces.empty()) {
             piece = pieces.top();
@@ -182,6 +196,17 @@ void ChessBoard::reStart() {
         startNewGame();
         repaint();
         ui->plainTextEdit->setPlainText("重新开始！");
+    }
+}
+
+void ChessBoard::check() {
+    if (game_win(list1)) {
+        whiteWin = true;
+        ui->plainTextEdit->appendPlainText("游戏结束，AI 胜利！");
+    }
+    else if (game_win(list2)) {
+        blackWin = true;
+        ui->plainTextEdit->appendPlainText("游戏结束，人类胜利！");
     }
 }
 

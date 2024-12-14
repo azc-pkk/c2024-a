@@ -18,8 +18,10 @@ int64_t alpha_beta(bool is_ai, int depth, int64_t alpha, int64_t beta) {
 
                 if (is_ai) { // AI 下，最大
                     list1.insert(std::make_pair(i, j));
+                    evl_board[i][j] = 1;
                     int64_t val = alpha_beta(false, depth - 1, alpha, beta);
                     list1.erase(std::make_pair(i, j));
+                    evl_board[i][j] = 0;
 
                     if (val > alpha && depth == DEPTH) {
                         next_step = std::make_pair(i, j);
@@ -29,8 +31,10 @@ int64_t alpha_beta(bool is_ai, int depth, int64_t alpha, int64_t beta) {
                 }
                 else {
                     list2.insert(std::make_pair(i, j));
+                    evl_board[i][j] = 2;
                     beta = std::min(beta, alpha_beta(true, depth - 1, alpha, beta));
                     list2.erase(std::make_pair(i, j));
+                    evl_board[i][j] = 0;
                 }
 
                 list3.erase(std::make_pair(i, j));

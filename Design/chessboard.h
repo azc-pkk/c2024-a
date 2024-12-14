@@ -9,7 +9,6 @@
 #include <QPainter>
 #include <QBrush>
 #include <QMouseEvent>
-#include <cstdio>
 #include <cmath>
 #include <stack>
 #include <utility>
@@ -32,6 +31,7 @@ public:
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void drawPiece(int x, int y, QPainter *painter, int r);
+    void check();
 signals:
     void human();
     void ai();
@@ -51,6 +51,8 @@ private:
     int mousePosX;
     int mousePosY;
     int T;
+    bool whiteWin;
+    bool blackWin;
     int board[ROW][COLUMN];
 };
 
