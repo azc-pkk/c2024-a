@@ -136,6 +136,9 @@ void ChessBoard::AIMove() {
 void ChessBoard::HumanMove() {
     int x = round((double)(clickedPoint.x() - MARGIN) / gridSize);
     int y = round((double)(clickedPoint.y() - MARGIN) / gridSize);
+    if (board[x][y] != 0) {
+        return;
+    }
     pieces.push(std::make_pair(x, y));
     list3.insert(std::make_pair(x, y));
     list2.insert(std::make_pair(x, y));

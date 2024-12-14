@@ -5,34 +5,34 @@ std::set< std::pair<int, int> > list1, list2, list3;
 //std::list< std::pair<int, int> > calculated;
 std::list< std::pair<int64_t, std::list< std::pair<int, int> > > > calculated;
 // 一个链表，每个元素是棋子序列和分数组成的 pair
-std::list< std::pair< int64_t, std::list<int> > > SHAPE = {
+std::list< std::pair< int64_t, int64_t > > SHAPE = {
 // 连五
-        {1000000, {1, 1, 1, 1, 1}},
+        {1000000, 911111},
 // 活四
-        {100000, {0, 1, 1, 1, 1, 0}},
+        {100000, 9011110},
 // 冲四
-        {50000, {2, 1, 1, 1, 1, 0}},
-        {50000, {2, 1, 1, 1, 0, 1}},
-        {50000, {1, 1, 0, 1, 1}},
+        {50000, 9211110},
+        {50000, 9211101},
+        {50000, 911011},
 // 活三
-        {5000, {0, 1, 1, 1, 0}},
-        {5000, {0, 1, 1, 0, 1}},
+        {5000, 901110},
+        {5000, 901101},
 // 眠三
-        {500, {2, 0, 1, 1, 1, 0, 2}},
-        {500, {1, 0, 1, 0, 1}},
-        {500, {1, 1, 0, 0, 1}},
-        {500, {2, 1, 1, 1, 0, 0}},
-        {500, {2, 1, 1, 0, 1, 0}},
-        {500, {2, 1, 0, 1, 1, 0}},
+        {500, 92011102},
+        {500, 910101},
+        {500, 911001},
+        {500, 9211100},
+        {500, 9211010},
+        {500, 9210110},
 // 活二
-        {50, {0, 1, 0, 0, 1, 0}},
-        {50, {0, 1, 0, 1, 0}},
-        {50, {0, 0, 1, 1, 0, 0}},
+        {50, 9010010},
+        {50, 901010},
+        {50, 9001100},
 // 眠二
-        {10, {1, 0, 0, 0, 1}},
-        {10, {2, 1, 0, 0, 1, 0}},
-        {10, {2, 1, 0, 1, 0, 0}},
-        {10, {2, 1, 1, 0, 0, 0}}
+        {10, 910001},
+        {10, 9210010},
+        {10, 9210100},
+        {10, 9211000}
 };
 
 int64_t evaluate() {
@@ -44,9 +44,9 @@ int64_t evaluate() {
         my_score += cal(piece.first, piece.second, 1, 1, list1, list2);
         my_score += cal(piece.first, piece.second, 1, -1, list1, list2);
     }
-    for (int i = 0; i <= ROW; i++) {
-        for (int j = 0; j <= COLUMN; j++) {
-            if (list2.count(std::make_pair(i, j)) == 0 && has_neighbour(i, j, 2))
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COLUMN; j++) {
+            if (evl_board[i][j] != 1 && has_neighbour(i, j, 2))
                 my_score += cal_cross(i, j);
         }
     }
@@ -57,9 +57,9 @@ int64_t evaluate() {
         en_score += cal(piece.first, piece.second, 1, 1, list2, list1);
         en_score += cal(piece.first, piece.second, 1, -1, list2, list1);
     }
-    for (int i = 0; i <= ROW; i++) {
-        for (int j = 0; j <= COLUMN; j++) {
-            if (list1.count(std::make_pair(i, j)) == 0 && has_neighbour(i, j, 2))
+    for (int i = 0; i < ROW; i++) {
+        for (int j = 0; j < COLUMN; j++) {
+            if (evl_board[i][j] != 2 && has_neighbour(i, j, 2))
                 en_score += cal_cross(i, j);
         }
     }
@@ -84,9 +84,9 @@ int64_t cal(int x, int y, int dx, int dy, std::set< std::pair<int, int> > &my_li
     std::list< std::pair<int, int> > max_shape;
     for (int len = 5; len <= 7; len++) {
         for (int offset = -len + 1; offset <= 0; offset++){
-            std::list<int> tmp_shape;
+            int64_t  tmp_shape = 9;
             for (int i = 0; i < len; i++) {
-                tmp_shape.push_back(check(x + (i + offset) * dx, y + (i + offset) * dy, is_ai ? 1 : 2));
+                tmp_shape = tmp_shape * 10 + check(x + (i + offset) * dx, y + (i + offset) * dy, is_ai ? 1 : 2);
             }
             for (const auto& shape: SHAPE) {
                 if (shape.first > max_score && shape.second == tmp_shape) {

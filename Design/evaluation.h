@@ -11,7 +11,7 @@ const int COLUMN = 15, ROW = 15;
 extern int evl_board[ROW][COLUMN];
 extern std::set< std::pair<int, int> > list1, list2, list3;
 extern std::list< std::pair<int64_t, std::list< std::pair<int, int> > > > calculated;
-extern std::list< std::pair< int64_t, std::list<int> > > SHAPE;
+extern std::list< std::pair< int64_t, int64_t > > SHAPE;
 
 int64_t evaluate();
 
