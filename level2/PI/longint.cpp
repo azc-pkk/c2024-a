@@ -2,11 +2,12 @@
 // Created by BeiDAmenLinyu on 2024/12/16.
 //
 
-#include "longrationalnumber.h"
+#include "longint.h"
 
-LongRationalNumber::LongRationalNumber()= default;
+LongInt::LongInt()= default;
 
-LongRationalNumber::LongRationalNumber(const std::string &s) {
+// 也不会管前导零
+LongInt::LongInt(const std::string &s) {
     if (s[0] == '-') {
         this->is_negative = true;
         this->num = s.substr(1);
@@ -17,11 +18,11 @@ LongRationalNumber::LongRationalNumber(const std::string &s) {
     }
 }
 
-// 绝对值加
-LongRationalNumber operator+(const LongRationalNumber &a, const LongRationalNumber &b) {
+// 绝对值加，不去前导零方便小数部分相加
+LongInt operator+(const LongInt &a, const LongInt &b) {
     int carry = 0;
     std::stack<int> num_a, num_b;
-    LongRationalNumber res;
+    LongInt res;
     res.num = "";
     for (auto ch : a.num) {
         num_a.push(ch - '0');
@@ -47,14 +48,14 @@ LongRationalNumber operator+(const LongRationalNumber &a, const LongRationalNumb
     return res;
 }
 
-std::ostream &operator<<(std::ostream &out, const LongRationalNumber &a) {
+std::ostream &operator<<(std::ostream &out, const LongInt &a) {
     if (a.is_negative)
         out << '-';
     out << a.num;
     return out;
 }
 
-bool operator<(const LongRationalNumber &a, const LongRationalNumber &b) {
+bool operator<(const LongInt &a, const LongInt &b) {
     if (a.is_negative ^ b.is_negative) {
         return a.is_negative;
     }
@@ -71,8 +72,8 @@ bool operator<(const LongRationalNumber &a, const LongRationalNumber &b) {
     return false;
 }
 
-LongRationalNumber operator-(const LongRationalNumber &a, const LongRationalNumber &b) {
-    LongRationalNumber res;
+LongInt operator-(const LongInt &a, const LongInt &b) {
+    LongInt res;
     res.num = "";
     if (a.is_negative ^ b.is_negative) {
         res = a + b;
@@ -111,15 +112,13 @@ LongRationalNumber operator-(const LongRationalNumber &a, const LongRationalNumb
             res.num += char(tmp + '0');
         }
         std::reverse(res.num.begin(), res.num.end());
-        // 去除结果的前导零
-        while (res.num.length() > 1 && res.num[0] == '0')
-            res.num = res.num.substr(1);
     }
     return res;
 }
 
-LongRationalNumber operator*(const LongRationalNumber &a, int b) {
-    LongRationalNumber res;
+// 同样不去前导零
+LongInt operator*(const LongInt &a, int b) {
+    LongInt res;
     res.num = "";
     std::stack<int> num_a;
     for (auto ch : a.num) {
@@ -141,28 +140,15 @@ LongRationalNumber operator*(const LongRationalNumber &a, int b) {
     }
     res.is_negative = a.is_negative;
     std::reverse(res.num.begin(), res.num.end());
-    while (res.num.length() > 1 && res.num[0] == '0')
-        res.num = res.num.substr(1);
     return res;
 }
 
-LongRationalNumber operator*(const LongRationalNumber &a, const LongRationalNumber &b) {
-    LongRationalNumber res;
+LongInt operator*(const LongInt &a, const LongInt &b) {
+    LongInt res;
     std::stack<int> num_b;
     for (auto ch : b.num) {
         num_b.push(ch - '0');
     }
-
-//    std::string zeros;
-//    while (!num_b.empty()) {
-//        LongRationalNumber t = a * num_b.top();
-//        t.num += zeros;
-//        zeros += "0";
-//        res = res + t;
-//        num_b.pop();
-//    }
-//    res.is_negative = a.is_negative ^ b.is_negative;
-//    return  res;
 
     std::string zeros;
     for (int i = 0; i * 8 < b.num.length(); i++) {
@@ -172,7 +158,7 @@ LongRationalNumber operator*(const LongRationalNumber &a, const LongRationalNumb
             tmp += num_b.top() * k;
             num_b.pop();
         }
-        LongRationalNumber t = a * tmp;
+        LongInt t = a * tmp;
         t.num += zeros;
         res = res + t;
         while (j--) {
@@ -184,19 +170,24 @@ LongRationalNumber operator*(const LongRationalNumber &a, const LongRationalNumb
 }
 
 // 四舍五入
-LongRationalNumber operator/(const LongRationalNumber &a, const LongRationalNumber &b) {
-    LongRationalNumber res;
+LongInt operator/(const LongInt &a, const LongInt &b) {
+    LongInt res;
     res.is_negative = a.is_negative ^ b.is_negative;
-    LongRationalNumber abs_a = a, abs_b = b;
+    LongInt abs_a = a, abs_b = b;
     abs_a.is_negative = abs_b.is_negative = false;
     while (!(abs_a < abs_b)) {
         abs_a = abs_a - abs_b;
-        res = res + LongRationalNumber("1");
+        res = res + LongInt("1");
     }
     if (!(abs_a * 2 < abs_b)) {
-        res = res + LongRationalNumber("1");
+        res = res + LongInt("1");
     }
     return res;
 }
+
+bool operator==(const LongInt &a, const LongInt &b) {
+    return a.num == b.num && a.is_negative == b.is_negative;
+}
+
 
 
